@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 type Operation = Callable[[str], str]
 
@@ -18,12 +18,17 @@ class CLI:
             return func
         return decorator
     
+    def _resolve_operations(self, ops: tuple[str, ...]) -> Sequence[Operation]: ...
+    
     def pipeline(self, *ops: str) -> Callable[[str], str]:
+        funcs = []
+        for op in ops:
+            if op not in self.registry:
+                raise KeyError(f"{op}: function not registered")
+            funcs.append(self.registry[op])
+
         def operator(content: str) -> str:
-            for op in ops:
-                func = self.registry.get(op)
-                if func is None:
-                    raise KeyError(f"{op}: function not registered")
+            for func in funcs:
                 content = func(content)
             return content
         return operator
