@@ -18,7 +18,7 @@ class CLI:
             return func
         return decorator
     
-    def pipeline(self, *ops: Operation) -> Callable[[str], str]:
+    def pipeline(self, *ops: str) -> Callable[[str], str]:
         def operator(content: str) -> str:
             for op in ops:
                 func = self.registry.get(op)
